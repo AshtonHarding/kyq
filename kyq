@@ -1,0 +1,41 @@
+#!/bin/bash
+package="kyq"
+
+youtubeURI="https://www.youtube.com/results?search_query="
+
+if [ -z "$1" ]; then 
+ echo 'You must specify flag. (e.g. -h)'
+fi
+
+while test $# -gt 0; do
+ case "$1" in
+  -h|--help)
+   echo "$package - For returning a list of youtube videos."
+   echo " "
+   echo "$package [option] [argument]"
+   echo " "
+   echo "options:"
+   echo "-h, --help       Shows this"
+   echo "-q, --query      Search for specific query on youtube"
+   exit 0
+   ;;
+  -q|--query)
+   query=$(echo ${@:2}  | sed 's/ /%20/g' )
+   html=$(wget -qO- $youtubeURI$query)
+   echo $html >> tmp.html
+   title=$(xmllint --html --xpath '//h3/a[@href]/span' tmp.html)
+   url=$(xmllint --html --xpath '//h3/a/@href' tmp.html)
+   echo $title | sed 's/<\/span>/\n/g' | sed 's/^.*>//' >> A_TITLE.txt
+   echo $url | sed 's/href="/\n/g' | sed 's/&.*//' | sed 's/"//' | sed 's/^/https:\/\/www.youtube.com/' | tail -n +2 | sed '/user/d' >> A_URL.txt
+   # Removes duplicate URL
+   $(awk '!x[$1]++' A_URL.txt >> A_URL_SORTED.txt)
+   ## Loop through both files and post them side by side.
+   # lol...
+   $(paste A_URL_SORTED.txt A_TITLE.txt > A_FINISHED.txt)
+   cat A_FINISHED.txt
+   $(rm A_FINISHED.txt A_TITLE.txt A_URL_SORTED.txt A_URL.txt tmp.html)
+   break
+   ;;
+ esac
+done
+

@@ -26,7 +26,7 @@ while test $# -gt 0; do
    title=$(xmllint --html --xpath '//h3/a[@href]/span' tmp.html)
    url=$(xmllint --html --xpath '//h3/a/@href' tmp.html)
    echo $title | sed 's/<\/span>/\n/g' | sed 's/^.*>//' >> A_TITLE.txt
-   echo $url | sed 's/href="/\n/g' | sed 's/&.*//' | sed 's/"//' | sed "/googleadservices/d" | sed 's/^/https:\/\/www.youtube.com/' | tail -n +2 | sed '/user/d' >> A_URL.txt
+   echo $url | sed 's/href="/\n/g' | sed 's/&.*//' | sed 's/"//' | sed "/googleadservices/d" | sed 's/^/https:\/\/www.youtube.com/' | tail -n +2 | sed '/user/d' | sed '/channel/d' >> A_URL.txt
    # Removes duplicate URL
    $(awk '!x[$1]++' A_URL.txt >> A_URL_SORTED.txt)
    ## Loop through both files and post them side by side.
